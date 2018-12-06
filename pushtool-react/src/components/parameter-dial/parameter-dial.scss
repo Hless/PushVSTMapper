@@ -1,0 +1,44 @@
+
+.parameter-dial {
+  h4 {
+    font-weight: normal;
+    color: #159573;
+    margin: 0;
+    padding-left: 3px;
+    font-size: 22px;
+    text-transform: lowercase;
+    margin-bottom: 5px;
+  }
+
+  .dial-graphic {
+    width: 85%;
+    height: 100%;
+    margin-left: 2px;
+    display: flex;
+
+    align-items: start;
+    justify-content: start;
+    position: relative;
+
+    .dial {
+      width: 80%;
+      opacity: 0.2;
+      position: absolute;
+
+      &.overlay {
+        //margin-left: -20%;
+        width: 40%;
+        overflow: hidden;
+        opacity: 0.8;
+
+        img {
+          width: 200%;
+        }
+      }
+      img {
+        width: 100%;
+      }
+
+    }
+  }
+}

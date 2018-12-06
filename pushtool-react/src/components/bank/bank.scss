@@ -1,0 +1,50 @@
+$bank-height: 180px;
+$bank-background: #181818;
+
+$handle-width: 40px;
+$handle-background: #1f1f1f;
+$handle-text-color: #fff;
+
+$color: rgb(21, 149, 115);
+
+.component-bank {
+    width: calc(100% - #{$handle-width});
+    background: $bank-background;
+
+    display: flex;
+    flex-direction: row;
+    padding: 20px;
+
+    .component-parameter {
+      width: 12.5%;
+      color: #fff;
+    }
+
+}
+
+.bank-wrapper {
+  height: $bank-height;
+  display: flex;
+  flex-direction: row;
+  width: $handle-width;
+  width: 100%;
+  position: relative;
+
+  .drag-handle {
+    line-height: $bank-height;
+    width: $handle-width;
+    text-align: center;
+    height: 100%;
+    color: $handle-text-color;
+    background: $handle-background;
+  }
+  .bank-name {
+    position: absolute;
+    left: $handle-width + 18px;
+    top: 0px;
+    background: $color;
+
+
+
+  }
+}

@@ -1,29 +1,30 @@
+import "@fortawesome/fontawesome-pro/css/all.min.css";
+
 import * as React from 'react';
 import './App.css';
-import { Bank, IBankConfig } from "./components";
+
+import { Bank, IBankConfig, BankUpdateEvent, IParameterSettings } from "./components";
+import { AvailableParameters } from "./components/available-parameters/available-parameters";
 import { DragDropContext, DropResult, Droppable } from 'react-beautiful-dnd';
 import update from "immutability-helper";
 
+import mockedBanks from "./mock/banks";
+import mockedAvailableParams from "./mock/available";
+
+
 interface IState {
-  banks:IBankConfig[]
+  banks:IBankConfig[],
+  available:IParameterSettings[]
 }
+
 
 class App extends React.Component<{}, IState> {
 
-  public state:IState = {
-    banks: [
-      { id: "Bank one", name: "Hello", parameters: [
-        { title:"VCF", type: "knob", id:"1" },
-        { title:"Test", type: "knob", id:"2" },
-        { title:"Hello", type: "Hi", id:"3"},
-      ]},
-      { id: "Bank two", name: "Bank two", parameters: [
-        { title:"VCF", type: "knob", id:"4" },
-        { title:"Test", type: "knob", id:"5" },
-        { title:"Hello", type: "Hi", id:"6"},
-      ]}
-    ]
+  public activeConfig = localStorage.getItem("_active_bank");
 
+  public state:IState = {
+    banks: this.activeConfig ? JSON.parse(this.activeConfig) : mockedBanks,
+    available: mockedAvailableParams
   };
 
   /*
@@ -44,6 +45,7 @@ class App extends React.Component<{}, IState> {
               <div className="banks">
                 {this.getBanks()}
               </div>
+              <AvailableParameters parameters={this.state.available} />
             </div>
           )}
         </Droppable>
@@ -52,8 +54,53 @@ class App extends React.Component<{}, IState> {
   }
 
   private getBanks() {
-    return this.state.banks.map((value, key) => <Bank index={key}   key={value.id} initialBankConfig={value} />)
+    return this.state.banks.map((value, key) => <Bank
+      index={key}
+      key={value.id}
+      config={value}
+      update={this.bankUpdate} />)
   }
+
+  private updateBanks(bankConfig:IBankConfig[]) {
+
+    localStorage.setItem("_active_bank", JSON.stringify(bankConfig));
+    // Persist bank state
+    this.setState({
+      banks: bankConfig
+    })
+  }
+
+  private bankUpdate = (event:BankUpdateEvent) => {
+    const bank = this.state.banks.findIndex((value) => value.id === event.id);
+
+    let newState = this.state.banks;
+    if(event.changes.name) {
+      newState = update(newState, {
+        [bank]: {
+         name: { $set: event.changes.name }
+        }
+      });
+    }
+
+    if(event.changes.parameter) {
+      const bankValue = this.state.banks.find((value) => value.id === event.id);
+
+      const param = bankValue!.parameters.findIndex((p) => p.id === event.changes.parameter!.id)
+      newState = update(newState, {
+        [bank]: {
+          parameters: {
+            [param]: {
+              $set: event.changes.parameter!
+            }
+          }
+        }
+      });
+    }
+
+    this.updateBanks(newState);
+  }
+
+
 
   private onDragEnd = (value:DropResult) => {
     if(!value.destination)
@@ -76,9 +123,7 @@ class App extends React.Component<{}, IState> {
       $splice: [[value.destination!.index, 0, bank!]]
     });
 
-    this.setState({
-      banks: newState
-    });
+    this.updateBanks(newState);
   }
 
   private moveParameter(value:DropResult) {
@@ -105,9 +150,7 @@ class App extends React.Component<{}, IState> {
       }
     })
 
-    this.setState({
-      banks: newState
-    });
+    this.updateBanks(newState);
   }
 }
 

@@ -4,20 +4,17 @@ import { Draggable } from 'react-beautiful-dnd';
 import { InlineInput } from "../inline-input/inline-input";
 import update from "immutability-helper";
 
-import { ParameterDial } from "../parameter-dial/parameter-dial";
 
 export interface IParameterSettings {
   id:string
   title:string
   type:"option"|"switch"|"dial"
-  value:string
 }
 
 interface IProps {
   config:IParameterSettings
   index:number,
   update: (settings:IParameterSettings) => void
-  editable:boolean
 }
 
 
@@ -32,10 +29,10 @@ export class Parameter extends React.Component<IProps> {
             {...provided.draggableProps}
             {...provided.dragHandleProps}>
 
-            {this.titleField()}
             <div className="visual">
-              {this.parameterDisplay()}
+              -
             </div>
+            <InlineInput defaultValue={this.props.config.title} onUpdate={this.onTitleUpdated} />
 
           </div>
         )}
@@ -43,23 +40,11 @@ export class Parameter extends React.Component<IProps> {
     )
   }
 
-  public titleField = () => {
-    if(this.props.editable)
-      return <InlineInput defaultValue={this.props.config.title} onUpdate={this.onTitleUpdated} />
-    else
-      return <h5>{this.props.config.title}</h5>
-
-  }
   public parameterDisplay = () => {
     switch(this.props.config.type) {
       case "dial":
-        return <ParameterDial value={this.props.config.value} />;
-      case "option":
-        return;
-      case "switch":
-        return;
+        return 
     }
-    return "Unknown"
   }
 
   public onTitleUpdated = (value:string) => {

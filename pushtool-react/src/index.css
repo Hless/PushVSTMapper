@@ -2,5 +2,15 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
-  background: #111;
+  background: #080808;
+}
+
+
+html, body, #root {
+  height: 100%;
+}
+
+
+* {
+  box-sizing: border-box;
 }
