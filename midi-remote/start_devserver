@@ -1,0 +1,1 @@
+nodemon -e py --exec "./install.command; killall Ableton Live 10 Suite; sleep 2; open -a 'Ableton Live 10 Suite'"

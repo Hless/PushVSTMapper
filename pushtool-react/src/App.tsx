@@ -1,11 +1,14 @@
 import "@fortawesome/fontawesome-pro/css/all.min.css";
 
 import * as React from 'react';
+
+import * as ReactDOM from 'react-dom';
+
 import './App.css';
 
 import { Bank, IBankConfig, BankUpdateEvent, IParameterSettings } from "./components";
 import { AvailableParameters } from "./components/available-parameters/available-parameters";
-import { DragDropContext, DropResult, Droppable } from 'react-beautiful-dnd';
+import { DragDropContext, DropResult, Droppable, DragUpdate } from 'react-beautiful-dnd';
 import update from "immutability-helper";
 
 import mockedBanks from "./mock/banks";
@@ -22,9 +25,14 @@ class App extends React.Component<{}, IState> {
 
   public activeConfig = localStorage.getItem("_active_bank");
 
+  private initialBanks:IBankConfig[] = this.activeConfig ? JSON.parse(this.activeConfig) : mockedBanks;
+  private initialFlat:IParameterSettings[] = (this.initialBanks as any).reduce((previousValue:any[], currentValue:IBankConfig) =>{
+    return [...previousValue, ...currentValue.parameters];
+  }, []);
+
   public state:IState = {
-    banks: this.activeConfig ? JSON.parse(this.activeConfig) : mockedBanks,
-    available: mockedAvailableParams
+    banks: this.initialBanks,
+    available: mockedAvailableParams.filter((a) => !this.initialFlat.find((b) => b.id == a.id))
   };
 
   /*
@@ -38,14 +46,14 @@ class App extends React.Component<{}, IState> {
 
   public render() {
     return (
-      <DragDropContext onDragEnd={this.onDragEnd}>
+      <DragDropContext onDragEnd={this.onDragEnd} onDragUpdate={this.onDragUpdate}>
         <Droppable droppableId="banksDroppable">
           {(provided ) => (
             <div className="App" ref={provided.innerRef}>
               <div className="banks">
                 {this.getBanks()}
               </div>
-              <AvailableParameters parameters={this.state.available} />
+              {this.getAvailableParameters()}
             </div>
           )}
         </Droppable>
@@ -61,13 +69,24 @@ class App extends React.Component<{}, IState> {
       update={this.bankUpdate} />)
   }
 
-  private updateBanks(bankConfig:IBankConfig[]) {
+  private getAvailableParameters() {
+    const paramComponent = <AvailableParameters parameters={this.state.available} />;
 
-    localStorage.setItem("_active_bank", JSON.stringify(bankConfig));
-    // Persist bank state
-    this.setState({
-      banks: bankConfig
-    })
+    return paramComponent;
+  }
+
+  private updateBanks(bankConfig?:IBankConfig[], available?:IParameterSettings[]) {
+    let stateUpdate:any = {};
+    if(bankConfig) {
+      localStorage.setItem("_active_bank", JSON.stringify(bankConfig));
+      stateUpdate.banks = bankConfig;
+    }
+
+    if(available) {
+      stateUpdate.available = available;
+    }
+
+    this.setState(stateUpdate)
   }
 
   private bankUpdate = (event:BankUpdateEvent) => {
@@ -106,11 +125,29 @@ class App extends React.Component<{}, IState> {
     if(!value.destination)
       return;
 
-    if(value.destination.droppableId === "banksDroppable")
+    if(value.destination.droppableId === "banksDroppable") {
       this.moveBank(value);
-    else
+    } else {
       this.moveParameter(value);
+    }
   };
+
+  private onDragUpdate = (update:DragUpdate) => {
+    const c = (ReactDOM.findDOMNode(this) as Element).querySelector(`[id='parameter-${update.draggableId}']`);
+    if(!c) return;
+    const node:Element = c!;
+
+    if(!update.destination || update.destination.droppableId === "availableParameters") {
+      let className = node.className.replace(" expanded", "");
+      className += " collapsed";
+      node.className = className;
+
+    } else {
+      let className = node.className.replace(" collapsed", "");
+      className += " expanded";
+      node.className = className;
+    }
+  }
 
   private moveBank(value:DropResult) {
     const bank = this.state.banks.find((_, key:number) => key === value.source.index);
@@ -127,30 +164,57 @@ class App extends React.Component<{}, IState> {
   }
 
   private moveParameter(value:DropResult) {
-    const from = this.state.banks.findIndex(bank => bank.id === value.source.droppableId);
-    const to = this.state.banks.findIndex(bank => bank.id === value.destination!.droppableId);
 
-    const fromBank = this.state.banks[from];
-
-    const param = fromBank.parameters.find((_, key:number) => key === value.source.index);
-
-    let newState = update(this.state.banks, {
-      [from]: {
-        parameters: {
-          $splice: [[value.source.index, 1]]
+    let newState:IState;
+    let param:IParameterSettings;
+    if(value.source.droppableId !== "availableParameters") {
+      // Find and remove paramater from bank
+      const from = this.state.banks.findIndex(bank => bank.id === value.source.droppableId);
+      const fromBank = this.state.banks[from];
+      param = fromBank.parameters.find((_, key:number) => key === value.source.index)!;
+      newState = update(this.state, {
+        banks: {
+         [from]: {
+           parameters: {
+             $splice: [[value.source.index, 1]]
+           }
+         }
         }
-      }
-    });
+      });
+    } else {
 
-    newState = update(newState, {
-      [to]: {
-        parameters: {
-          $splice: [[value.destination!.index, 0, param!]]
+      // Find and remove parameter from available parameters
+      param = this.state.available.find((_, key:number) => key === value.source.index)!;
+
+      newState = update(this.state, {
+         available: {
+           $splice: [[value.source.index, 1]]
+         }
+      });
+    }
+
+    if(value.destination!.droppableId !== "availableParameters") {
+      const to = this.state.banks.findIndex(bank => bank.id === value.destination!.droppableId);
+
+      newState = update(newState!, {
+        banks: {
+          [to]: {
+            parameters: {
+              $splice: [[value.destination!.index, 0, param!]]
+            }
+          }
         }
-      }
-    })
+      })
+    } else {
 
-    this.updateBanks(newState);
+      newState = update(newState!, {
+         available: {
+           $splice: [[value.destination!.index, 0, param!]]
+         }
+      });
+    }
+
+    this.updateBanks(newState.banks, newState.available);
   }
 }
 

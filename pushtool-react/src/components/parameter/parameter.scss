@@ -2,22 +2,29 @@
 .component-parameter {
   text-align: left;
 
-  h5 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: normal;
+
+  &.collapsed {
+    height: auto;
+     
+    .visual {
+      display: none;
+
+    }
+
   }
   .visual {
     height: 75px;
     width: 75px;
   }
 
-  .inline-input {
+  h5, .inline-input {
     font-size: 14px;
     text-align: left;
     text-transform: uppercase;
     width: 100%;
     font-weight: lighter;
     margin-top: 8px;
+
+    margin-bottom: 0;
   }
 }

@@ -14,7 +14,7 @@ export class AvailableParameters extends React.Component<IProps> {
 
   public render() {
     return (
-      <Droppable droppableId="available-parameters" type="available">
+      <Droppable droppableId="availableParameters" type="PARAMETER">
         {(innerProvided ) => (
           <div ref={innerProvided.innerRef} className="available-parameters" {...innerProvided.droppableProps}>
             {this.getParameters()}
@@ -25,15 +25,11 @@ export class AvailableParameters extends React.Component<IProps> {
     )
   }
 
-
-
   private onParameterUpdate = (value:IParameterSettings) => {
     return value;
   }
 
   private getParameters() {
-
-    console.log(this.props.parameters)
     return this.props.parameters.map((param,key) => <Parameter
       index={key}
       key={param.id}

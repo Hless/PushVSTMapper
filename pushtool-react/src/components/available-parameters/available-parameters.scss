@@ -2,6 +2,7 @@
 .available-parameters {
   height: 100%;
   width: 300px;
+  min-width: 300px;
 
   padding: 20px;
   background: #111;
@@ -10,9 +11,16 @@
   .component-parameter {
     width: 50%;
     color: #fff;
-    height: 28px;
     .visual {
       display: none;
+    }
+
+    &.expanded {
+      height: auto;
+
+      .visual {
+        display: block;
+      }
     }
   }
 }

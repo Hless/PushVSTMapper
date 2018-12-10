@@ -45,7 +45,7 @@ export class Bank extends React.Component<IProps> {
               {...provided.dragHandleProps}>
               <i className="far fa-arrows-alt" />
             </div>
-          <Droppable droppableId={this.props.config.id} type="PERSON" direction="horizontal">
+          <Droppable droppableId={this.props.config.id} type="PARAMETER" direction="horizontal">
             {(innerProvided ) => (
               <div ref={innerProvided.innerRef} className="component-bank" {...innerProvided.droppableProps}>
                 {this.getParameters()}

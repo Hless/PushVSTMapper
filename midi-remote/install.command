@@ -35,7 +35,7 @@ function find_ableton_path {
   NUM_INSTALLS="${#ABLETON_PATHS[@]}"
   if [ "$NUM_INSTALLS" -gt "1" ]
     then
-    PS3='Where do you want to install Ubermap? '
+    PS3='Where do you want to install PushTool? '
 
     echo -e "\033[33m(!) More than one Ableton Live installation found."  > /dev/tty
     select opt in "${ABLETON_PATHS[@]}"
@@ -67,33 +67,22 @@ echo "$(tput sgr0) --> Installing into ${LIVE_MIDI_REMOTE_PATH} ... "
 
 cd ${0%/*}
 
-cp_if_ne "$LIVE_MIDI_REMOTE_PATH/Push/__init__.pyc" "$LIVE_MIDI_REMOTE_PATH/Push/__init__.py.ubermap-backup"
-check_error
 cp_if_ne "$LIVE_MIDI_REMOTE_PATH/Push2/__init__.pyc" "$LIVE_MIDI_REMOTE_PATH/Push2/__init__.pyc.ubermap-backup"
 check_error
 
 # Copy
-mkdir -p "$LIVE_MIDI_REMOTE_PATH/Ubermap"
-cp ../Common/__init__.py "$LIVE_MIDI_REMOTE_PATH/Ubermap/"
+rm -rf "$LIVE_MIDI_REMOTE_PATH/pushtool/"
+cp -r ./pushtool "$LIVE_MIDI_REMOTE_PATH/"
 check_error
 
-cp ../Common/configobj.py "$LIVE_MIDI_REMOTE_PATH/Ubermap/"
-cp ../Common/UbermapLibs.py "$LIVE_MIDI_REMOTE_PATH/Ubermap/"
-cp UbermapDevices.py "$LIVE_MIDI_REMOTE_PATH/Ubermap/"
-cp UbermapDevicesPatches.py "$LIVE_MIDI_REMOTE_PATH/Ubermap/"
-cp UbermapVisualisation.py "$LIVE_MIDI_REMOTE_PATH/Ubermap/"
-
-cp Push/__init__.py "$LIVE_MIDI_REMOTE_PATH/Push/"
-cp Push2/__init__.py "$LIVE_MIDI_REMOTE_PATH/Push2/"
+cp devices/push2/__init__.py "$LIVE_MIDI_REMOTE_PATH/Push2/"
 
 # Copy config
-mkdir -p ~/Ubermap/Devices
-cp_if_ne ../Config/devices.cfg ~/Ubermap/
-cp_if_ne ../Config/global.cfg ~/Ubermap/
+mkdir -p ~/pushtool/devices
 
 # Remove .pyc
-rm "$LIVE_MIDI_REMOTE_PATH/Ubermap/*.pyc" 2> /dev/null
+rm "$LIVE_MIDI_REMOTE_PATH/pushtool/*.pyc" 2> /dev/null
 rm "$LIVE_MIDI_REMOTE_PATH/Push/__init__.pyc" 2> /dev/null
 rm "$LIVE_MIDI_REMOTE_PATH/Push2/__init__.pyc" 2> /dev/null
 
-echo -e "\033[32mUbermap installed - now restart Ableton Live. "
+echo -e "\033[32mPushtool installed - now restart Ableton Live. "

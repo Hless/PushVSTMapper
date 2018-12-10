@@ -28,7 +28,7 @@ export class Parameter extends React.Component<IProps> {
       <Draggable draggableId={`${this.props.config.id}`} index={this.props.index}>
         {(provided) => (
 
-          <div className="component-parameter" ref={provided.innerRef}
+          <div id={'parameter-' + this.props.config.id} className="component-parameter" ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}>
 
@@ -48,8 +48,8 @@ export class Parameter extends React.Component<IProps> {
       return <InlineInput defaultValue={this.props.config.title} onUpdate={this.onTitleUpdated} />
     else
       return <h5>{this.props.config.title}</h5>
-
   }
+  
   public parameterDisplay = () => {
     switch(this.props.config.type) {
       case "dial":
