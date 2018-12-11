@@ -1,0 +1,2 @@
+
+tail -n 60 -f $HOME/Library/Preferences/Ableton/Live\ 10.0.5/Log.txt
